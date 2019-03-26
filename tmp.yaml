@@ -1,0 +1,43 @@
+connectivityPlugins:
+  classifierCodec:
+    libraryName: ClassifierCodec
+    class: ClassifierCodec
+  httpClient:
+    directory: ${PARENT_DIR}/Release
+    libraryName: HTTPClientSample
+    class: HTTPClient
+  stringCodec:
+    libraryName: connectivity-string-codec
+    class: StringCodec
+
+
+startChains:
+
+  # Create a chain which will take HTTPRequest events and send them to the
+  # transport, then classify the responses as either an HTTPResponse or
+  # an HTTPError and turn them into those events in the correlator
+  http:
+    # Use the Map host plugin, so the payload type will be a map<string,data>
+    # with the keys being the name of the fields in the event
+    - apama.eventMap:
+        # Capture events to this channel ...
+        subscribeChannels:
+          - getRequest
+        # ... and send them back to this channel
+        defaultChannel: httpdata
+
+    # The classifier checks the status code to see whether or not it's 
+    # an error and assigns the correct event type so that the mapper
+    # can correctly map it
+    - classifierCodec:
+        rules:
+          - apamax.httpclient.HTTPResponse:
+              - metadata.http.statusCode: 200
+          - apamax.httpclient.HTTPError:
+              - metadata.http.statusCode:
+
+    # HTTP transport configured with the host to connect to
+    - stringCodec
+    - httpClient:
+            #host: "${HOST}"
+

@@ -73,20 +73,32 @@ all: $(ALL)
 # -----------------------
 # Simple plugin, C++ API
 # -----------------------
-Release/libHTTPClientSample.so: Release/int/HTTPClientSample.o
+Release/libHTTPClientSample.so: Release/int/HTTPClient.o Release/int/gowrapper.a Release/int/c_go_interface.o
 	mkdir -p Release
 	$(CXX) $(LDFLAGS) $(CXX_LDFLAGS) -o $@ $^ $(LIBS)
 
-Release/int/HTTPClientSample.o: HTTPClient.cpp
+Release/int/HTTPClientSample.o: HTTPClient.o c_go_interface.o
+	mkdir -p Release/int
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
+
+Release/int/HTTPClient.o: HTTPClient.cpp
 	mkdir -p Release/int
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+
+Release/int/c_go_interface.o: c_go_interface.cpp
+	mkdir -p Release/int
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+
+Release/int/gowrapper.a: gowrapper.go gowrapper.h
+	mkdir -p Release/int
+	go build -buildmode=c-archive -o $@ gowrapper.go
 
 
 # ========
 # Cleanup
 # ========
 
-RM := rm -f
+RM := rm -rf
 
 clean:
 	-$(RM) Release
