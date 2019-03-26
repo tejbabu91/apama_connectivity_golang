@@ -1,12 +1,50 @@
 package main
 
-import "fmt"
-
 // #cgo LDFLAGS: -Wl,--unresolved-symbols=ignore-all
 // #include "c_go_interface.h"
 import "C"
 
-import "unsafe"
+import (
+	"encoding/json"
+	"fmt"
+	"unsafe"
+)
+
+type Message struct {
+	payload  interface{}
+	metadata map[string]interface{}
+}
+
+func serializeMsg(msg *Message) []byte {
+	var data = map[string]interface{}{
+		"data":     msg.payload,
+		"metadata": msg.metadata,
+	}
+
+	val, err := json.Marshal(data)
+
+	if err != nil {
+		fmt.Println(err)
+		return []byte{}
+	}
+	return val
+}
+
+func deserializeMsg(v []byte) *Message {
+	var data map[string]interface{}
+
+	err := json.Unmarshal(v, &data)
+	if err != nil {
+		return nil
+	}
+
+	msg := Message{
+		payload:  data["data"],
+		metadata: data["metadata"].(map[string]interface{}),
+	}
+
+	return &msg
+}
 
 type gorun interface {
 	Start()
