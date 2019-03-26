@@ -1,75 +1,74 @@
 /**
- * An application to demonstrate use of the HTTPClient transport.
- *
- * Listens for Get events, then sends an HTTPRequest event to the transport
- * and listens for HTTPResponse/HTTPError events for that request to report 
- * the result.
- * 
- * $Copyright (c) 2016-2017 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$ 
+ * $Copyright (c) 2019 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$ 
  * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG 
  */
-package apamax.httpclient;
+package apamax.golang;
 
 using com.softwareag.connectivity.ConnectivityPlugins;
 
 
 /** Internal event for sending to the chain */
-event HTTPRequest
+event StringRequest
 {
 	integer id;
 	string data;
 }
 
 /** Internal response event from the chain */
-event HTTPResponse
+event StringResponse
 {
 	integer id;
 	string body;
 }
 
-/** Internal error response event from the chain */
-event HTTPError
-{
+event Request {
 	integer id;
-	integer code;
-	string message;
+	any data;
+}
+event Response {
+	integer id;
+	any data;
 }
 
-/** 
- * Monitor which listens for Get events externally, 
- * then manages the HTTPRequest/Response/Error protocol
- * to the transport
- */
-monitor HTTPGetSample
+monitor GoTransportSample
 {
 	action onload()
 	{
 		// get responses that come back from the chain
-		monitor.subscribe("httpdata");
+		monitor.subscribe("goResonse");
 
 		// signal that we are ready to receive events
 		ConnectivityPlugins.onApplicationInitialized();
 		string data := "Hello to Go from Apama";
-		doRequest(data)
+		simpleRequest(data);
+		doRequest(data);
+		dictionary<string, sequence<string> > map := {
+			"even": ["zero", "two", "four"],
+			"odd": ["one", "three", "five"],
+			"prime": ["two", "three", "five"]
+		};
+		doRequest(map);
 	}
-	action doRequest(string data)
+	action doRequest(any data)
 	{
-		// generate a unique ID for this request
 		integer id := integer.getUnique();
-
-		// listen for the response
-		on HTTPResponse(id=id) as resp and not HTTPError(id=id) {
-			log "Got response from "+path at INFO;
-			print resp.body;
+		on Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
 		}
+		send Request(id, data) to "goRequest";
+		log "Sent: " + Request(id, data).toString();
+	}
 
-		// or the error
-		on HTTPError(id=id) as err and not HTTPResponse(id=id) {
-			log "Error code: "+err.code.toString()+" - "+err.message at ERROR;
+	action simpleRequest(string data) {
+		integer id := integer.getUnique();
+		on Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
 		}
-
-		// send the request
-		send HTTPRequest(id, data) to "getRequest";
+		on StringResponse(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
+		}
+		send StringRequest(id, data) to "goRequest";
+		log "Sent: " + StringRequest(id, data).toString();
 	}
 }
 

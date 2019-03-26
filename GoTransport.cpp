@@ -39,7 +39,10 @@ namespace golang {
 	/** Parse the request and queue it for later servicing */
 	void GoTransport::deliverMessageTowardsTransport(Message &m)
 	{
-		logger.info("C++ deliverMessageTowardsTransport");
+		logger.info("C++ deliverMessageTowardsTransport: %s", to_string(m).c_str());
+		auto payload = get<std::string>(m.getPayload());
+		char * str = const_cast<char*>(payload.c_str());
+		go_transport_deliverMessageTowardsTransport(static_cast<void*>(str), payload.size());
 	}
 
 	void GoTransport::towardsHost(char* buf, int bufLen) {

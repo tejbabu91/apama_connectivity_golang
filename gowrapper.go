@@ -40,9 +40,10 @@ func deserializeMsg(v []byte) *Message {
 	}
 
 	msg := Message{
-		payload:  data["data"],
-		metadata: data["metadata"].(map[string]interface{}),
+		payload: data["data"],
 	}
+
+	//mdata, ok := data["metadata"].(map[string]interface{}),
 
 	return &msg
 }
