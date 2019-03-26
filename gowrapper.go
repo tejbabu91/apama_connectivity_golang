@@ -56,7 +56,7 @@ func DeliverMessageTowardsTransport(buf unsafe.Pointer, bufLen C.int) {
 		fmt.Printf("%c", c)
 	}
 	fmt.Println()
-	C.c_callback(gobj.obj)
+	C.c_callback(gobj.obj, unsafe.Pointer(&gobuf[0]), C.int(len(gobuf)))
 }
 
 func main() {} // Required but ignored

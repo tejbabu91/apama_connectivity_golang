@@ -64,10 +64,16 @@ namespace samples {
 	{
 	}
 
-	void HTTPClient::towardsHost() {
+	void HTTPClient::towardsHost(char* buf, int bufLen) {
 		// Message m;
 		// hostSide->sendBatchTowardsHost(&m, &m+1);
-		logger.error("##### towards host called");
+		logger.error("##### towards host called, %p, %d", buf, bufLen);
+		char lbuf[100];
+		for(int i=0;i<bufLen;i++) {
+			lbuf[i] = buf[i];
+		}
+		lbuf[bufLen] = '\0';
+		logger.error("Received: %s", lbuf);
 	}
 
 /** Export this transport */
