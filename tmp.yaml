@@ -2,10 +2,10 @@ connectivityPlugins:
   classifierCodec:
     libraryName: ClassifierCodec
     class: ClassifierCodec
-  httpClient:
+  goTransport:
     directory: ${PARENT_DIR}/Release
-    libraryName: HTTPClientSample
-    class: HTTPClient
+    libraryName: GoTransport
+    class: GoTransport
   stringCodec:
     libraryName: connectivity-string-codec
     class: StringCodec
@@ -42,6 +42,5 @@ startChains:
     
     # HTTP transport configured with the host to connect to
     - stringCodec
-    - httpClient:
-            #host: "${HOST}"
+    - goTransport
 

@@ -64,7 +64,7 @@ LDFLAGS += "-L$(APAMA_HOME)/lib" -lapclient
 # Plugin library build targets
 # =============================
 
-ALL := Release/libHTTPClientSample.so
+ALL := Release/libGoTransport.so
 
 all: $(ALL)
 
@@ -73,15 +73,15 @@ all: $(ALL)
 # -----------------------
 # Simple plugin, C++ API
 # -----------------------
-Release/libHTTPClientSample.so: Release/int/HTTPClient.o Release/int/gowrapper.a Release/int/c_go_interface.o
+Release/libGoTransport.so: Release/int/GoTransportCpp.o Release/int/gowrapper.a Release/int/c_go_interface.o
 	mkdir -p Release
 	$(CXX) $(LDFLAGS) $(CXX_LDFLAGS) -o $@ $^ $(LIBS)
 
-Release/int/HTTPClientSample.o: HTTPClient.o c_go_interface.o
+Release/int/GoTransport.o: GoTransportCpp.o c_go_interface.o
 	mkdir -p Release/int
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
 
-Release/int/HTTPClient.o: HTTPClient.cpp
+Release/int/GoTransportCpp.o: GoTransport.cpp
 	mkdir -p Release/int
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
 

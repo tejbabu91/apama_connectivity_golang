@@ -1,10 +1,10 @@
-#include "HTTPClient.h"
+#include "GoTransport.h"
 
 // typedef void (*CBType) (void);
 
 // static CBType cb;
 
-using com::softwareag::samples::HTTPClient;
+using apamax::golang::GoTransport;
 
 // void callback(void* ptr, char *buf, int buflen) {
 //     HTTPClient* obj = reinterpret_cast<HTTPClient*>(ptr);
@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 void c_callback(void *ptr, void *buf, int buflen) {
-    HTTPClient* obj = reinterpret_cast<HTTPClient*>(ptr);
+    GoTransport* obj = reinterpret_cast<GoTransport*>(ptr);
     obj->towardsHost((char*)buf, buflen);
 }
 
