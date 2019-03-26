@@ -1,1 +1,4 @@
 Release
+Output
+__pycache__
+*.swp

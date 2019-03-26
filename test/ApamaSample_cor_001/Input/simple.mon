@@ -1,0 +1,15 @@
+event SimpleEvent {
+	string message;
+}
+
+monitor Simple {
+	SimpleEvent evt;
+	
+	action onload() {
+		monitor.subscribe("TestChannel");
+		on all SimpleEvent():evt {
+			log "Received simple event with message - " + evt.message at INFO;
+			send evt to "EchoChannel";
+		}
+	}
+}
