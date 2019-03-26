@@ -9,7 +9,9 @@ connectivityPlugins:
   stringCodec:
     libraryName: connectivity-string-codec
     class: StringCodec
-
+  diag:
+    libraryName: DiagnosticCodec
+    class: DiagnosticCodec
 
 startChains:
 
@@ -36,6 +38,8 @@ startChains:
           - apamax.httpclient.HTTPError:
               - metadata.http.statusCode:
 
+    - diag: { tag: transport }
+    
     # HTTP transport configured with the host to connect to
     - stringCodec
     - httpClient:
