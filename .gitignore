@@ -2,3 +2,6 @@ Release
 Output
 __pycache__
 *.swp
+.vscode
+_obj
+.idea

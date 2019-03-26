@@ -39,16 +39,16 @@ namespace samples {
 		// port = configEx.getStringDisallowEmpty("port", "80");
 		configEx.checkNoItemsRemaining();
 
-		go_init(this);
+		go_transport_create(this);
 	}
 
 	void HTTPClient::start()
 	{
-		logger.error("start called");
-		Start();
+		logger.info("C++ start called");
+		go_transport_start();
 
 		char buf[11] = "HelloWorld";
-		DeliverMessageTowardsTransport(buf, sizeof(buf)-1);
+		CallIntoTransport(buf, sizeof(buf)-1);
 
 		transportStatus->setStatus(StatusReporter::STATUS_ONLINE());
 	}
@@ -56,12 +56,13 @@ namespace samples {
 	/** Stop the plugin and wait for the request-handling thread */
 	void HTTPClient::shutdown()
 	{
-		Stop();
+		go_transport_shutdown();
 	}
 
 	/** Parse the request and queue it for later servicing */
 	void HTTPClient::deliverMessageTowardsTransport(Message &m)
 	{
+		logger.info("C++ deliverMessageTowardsTransport");
 	}
 
 	void HTTPClient::towardsHost(char* buf, int bufLen) {
