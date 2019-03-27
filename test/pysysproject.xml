@@ -62,6 +62,8 @@
 	<property name="APAMA_HOME"              value="${env.APAMA_HOME}"/>
 	<property name="APAMA_WORK"              value="${env.APAMA_WORK}"/>
 	<property name="APAMA_COMMON_JRE"        value="${env.APAMA_JRE}"/> 
+	<property name="REPO_ROOT"        		 value="${root}/.."/>
+	<property name="EXAMPLES_DIR"            value="${root}/../examples"/>
 
 	<!-- Specify a property for the location of the application being tested. 
 	Binaries and configuration files can be specified relative to this directory 

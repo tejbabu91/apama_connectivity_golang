@@ -31,6 +31,8 @@ public:
 	virtual void deliverMessageTowardsTransport(com::softwareag::connectivity::Message &m) override;
 
     void towardsHost(char* buf, int bufLen);
+
+	virtual void hostReady();
 };
 
 }} // apamax.golang

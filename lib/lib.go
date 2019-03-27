@@ -12,14 +12,14 @@ import (
 
 // The Message struct used for message passing
 type Message struct {
-	payload  interface{}
-	metadata map[string]interface{}
+	Payload  interface{}
+	Metadata map[string]interface{}
 }
 
 func serializeMsg(msg *Message) []byte {
 	var data = map[string]interface{}{
-		"data":     msg.payload,
-		"metadata": msg.metadata,
+		"data":     msg.Payload,
+		"metadata": msg.Metadata,
 	}
 
 	val, err := json.Marshal(data)
@@ -40,8 +40,8 @@ func deserializeMsg(v []byte) *Message {
 	}
 
 	msg := Message{
-		payload:  data["data"],
-		metadata: data["metadata"].(map[string]interface{}),
+		Payload:  data["data"],
+		Metadata: data["metadata"].(map[string]interface{}),
 	}
 
 	//mdata, ok := data["metadata"].(map[string]interface{}),
@@ -119,19 +119,17 @@ func (t *BaseTransport) InitBase(ptr unsafe.Pointer, config map[string]interface
 
 // DeliverMessageTowardsHost must be called by user to send message to host
 func (t *BaseTransport) DeliverMessageTowardsHost(msg *Message) {
-	fmt.Println("DeliverMessageTowardsHost called")
 	gobuf := serializeMsg(msg)
-	fmt.Printf("DeliverMessageTowardsHost deliver: %v\n", gobuf)
+	fmt.Printf("DeliverMessageTowardsHost called: %v\n", string(gobuf))
 	C.c_callback(t.RawCppTransport(), unsafe.Pointer(&gobuf[0]), C.int(len(gobuf)))
 }
 
 //export go_transport_create
 func go_transport_create(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
-	fmt.Printf("go_transport_create called: %v\n", obj)
 	gobuf := C.GoBytes(buf, bufLen)
 	var config map[string]interface{}
 	err := json.Unmarshal(gobuf, &config)
-	fmt.Printf("go_transport_create config: %s\n", config)
+	fmt.Printf("go_transport_create called with config: %s\n", config)
 	if err != nil {
 		fmt.Printf("go_transport_create failed to populate config: %s\n", config)
 	}
@@ -168,10 +166,10 @@ func go_transport_hostready(obj unsafe.Pointer) {
 
 //export go_transport_deliverMessageTowardsTransport
 func go_transport_deliverMessageTowardsTransport(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
-	fmt.Println("go_transport_deliverMessageTowardsTransport called")
+	// fmt.Println("go_transport_deliverMessageTowardsTransport called")
 	gobuf := C.GoBytes(buf, bufLen)
-	fmt.Printf("go_transport_deliverMessageTowardsTransport deliver: %v\n", gobuf)
 	msg := deserializeMsg(gobuf)
+	fmt.Printf("go_transport_deliverMessageTowardsTransport called: %v\n", msg)
 	TransportObject := mapper.getMapping(obj)
 	TransportObject.DeliverMessageTowardsTransport(msg)
 }

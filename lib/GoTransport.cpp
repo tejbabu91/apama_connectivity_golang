@@ -130,12 +130,9 @@ namespace golang {
 		hostSide->sendBatchTowardsHost(&m, &m+1);
 	}
 
-	void convertConfigToJson() {
-		//ostringstream os;
-
-
+	void GoTransport::hostReady() {
+		go_transport_hostready(this);
 	}
-
 /** Export this transport */
 SAG_DECLARE_CONNECTIVITY_TRANSPORT_CLASS(GoTransport)
 
