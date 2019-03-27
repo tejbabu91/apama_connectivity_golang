@@ -2,7 +2,6 @@ SAMPLE
 
    Sample connectivity plugin to demonstrate golang integration
 
-
 DESCRIPTION
 
   This is an experiment to write connectivity plugins in golang.
