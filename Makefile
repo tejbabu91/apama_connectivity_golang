@@ -73,25 +73,10 @@ all: $(ALL)
 # -----------------------
 # Simple plugin, C++ API
 # -----------------------
-Release/libGoTransport.so: Release/int/GoTransportCpp.o Release/int/gowrapper.a Release/int/c_go_interface.o
+Release/libGoTransport.so: ./lib/lib.go ./gowrapper.go ./user_go_layer/user.go ./lib/c_go_interface.h ./lib/GoTransport.h ./lib/GoTransport.cpp ./lib/c_go_interface.cpp
 	mkdir -p Release
-	$(CXX) $(LDFLAGS) $(CXX_LDFLAGS) -o $@ $^ $(LIBS)
+	CGO_CFLAGS="$(CFLAGS)" CGO_CPPFLAGS="$(CPPFLAGS)" CGO_CXXFLAGS="$(CXXFLAGS)" CGO_LDFLAGS="$(LDFLAGS)" go build -buildmode=c-shared -o $@
 
-Release/int/GoTransport.o: GoTransportCpp.o c_go_interface.o
-	mkdir -p Release/int
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
-
-Release/int/GoTransportCpp.o: GoTransport.cpp
-	mkdir -p Release/int
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
-
-Release/int/c_go_interface.o: c_go_interface.cpp
-	mkdir -p Release/int
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
-
-Release/int/gowrapper.a: gowrapper.go gowrapper.h
-	mkdir -p Release/int
-	go build -buildmode=c-archive -o $@ gowrapper.go
 
 
 # ========

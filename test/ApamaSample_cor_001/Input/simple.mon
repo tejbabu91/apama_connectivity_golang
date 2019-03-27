@@ -1,15 +1,74 @@
-event SimpleEvent {
-	string message;
+/**
+ * $Copyright (c) 2019 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$ 
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG 
+ */
+package apamax.golang;
+
+using com.softwareag.connectivity.ConnectivityPlugins;
+
+
+/** Internal event for sending to the chain */
+event StringRequest
+{
+	integer id;
+	string data;
 }
 
-monitor Simple {
-	SimpleEvent evt;
-	
-	action onload() {
-		monitor.subscribe("TestChannel");
-		on all SimpleEvent():evt {
-			log "Received simple event with message - " + evt.message at INFO;
-			send evt to "EchoChannel";
+/** Internal response event from the chain */
+event StringResponse
+{
+	integer id;
+	string body;
+}
+
+event Request {
+	integer id;
+	any data;
+}
+event Response {
+	integer id;
+	any data;
+}
+
+monitor GoTransportSample
+{
+	action onload()
+	{
+		// get responses that come back from the chain
+		monitor.subscribe("goResonse");
+
+		// signal that we are ready to receive events
+		ConnectivityPlugins.onApplicationInitialized();
+		string data := "Hello to Go from Apama";
+		simpleRequest(data);
+		doRequest(data);
+		dictionary<string, sequence<string> > map := {
+			"even": ["zero", "two", "four"],
+			"odd": ["one", "three", "five"],
+			"prime": ["two", "three", "five"]
+		};
+		doRequest(map);
+	}
+	action doRequest(any data)
+	{
+		integer id := integer.getUnique();
+		on Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
 		}
+		send Request(id, data) to "goRequest";
+		log "Sent: " + Request(id, data).toString();
+	}
+
+	action simpleRequest(string data) {
+		integer id := integer.getUnique();
+		on Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
+		}
+		on StringResponse(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
+		}
+		send StringRequest(id, data) to "goRequest";
+		log "Sent: " + StringRequest(id, data).toString();
 	}
 }
+

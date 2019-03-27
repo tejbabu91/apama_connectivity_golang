@@ -1,0 +1,69 @@
+connectivityPlugins:
+  classifierCodec:
+    libraryName: ClassifierCodec
+    class: ClassifierCodec
+  goTransport:
+    directory: ${PARENT_DIR}/Release
+    libraryName: GoTransport
+    class: GoTransport
+  stringCodec:
+    libraryName: connectivity-string-codec
+    class: StringCodec
+  diag:
+    libraryName: DiagnosticCodec
+    class: DiagnosticCodec
+  jsonCodec:
+    libraryName: connectivity-json-codec
+    class: JSONCodec
+  mapperCodec:
+    libraryName: MapperCodec
+    class: MapperCodec
+startChains:
+  goTransport:
+    # Use the Map host plugin, so the payload type will be a map<string,data>
+    # with the keys being the name of the fields in the event
+    - apama.eventMap:
+        # Capture events to this channel ...
+        subscribeChannels:
+          - goRequest
+        # ... and send them back to this channel
+        defaultChannel: goResponse
+        defaultEventType: "apamax.golang.Response"
+    
+    - diag: { tag: application1 }
+   
+    # # application specific mapping
+    - mapperCodec:
+        "*":
+          towardsTransport:
+            mapFrom:
+              - metadata.requestId: payload.id
+              - payload: payload.data
+          towardsHost:
+            mapFrom:
+              - payload.data: payload
+              - payload.id: metadata.requestId
+
+    - diag: { tag: application2 }   
+    
+    # Framework specific mapping: move both payload and metadata into a single map which can be encoded into json
+    - mapperCodec:
+        "*":
+          towardsTransport:
+            mapFrom:
+              - payload.data: payload
+            # copyFrom:
+            #   - payload.metadata: metadata
+            defaultValue:
+              - metadata.contentType: application/json
+          towardsHost:
+            mapFrom:
+              # - metadata: payload.metadata
+              - payload: payload.data
+
+    - diag: { tag: transport }
+
+    # convert everything to json as encoding format  
+    - jsonCodec
+    - goTransport
+

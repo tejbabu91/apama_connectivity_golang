@@ -13,7 +13,7 @@ class PySysTest(ApamaBaseTest):
 		# engine receive listening on the Echo Channel
 		correlator = CorrelatorHelper(self, name='mycorrelator')
 		correlator.start(logfile='mycorrelator.log', inputLog='mycorrelator.input.log')
-		correlator.receive(filename='receive.evt', channels=['EchoChannel'])
+		#correlator.receive(filename='receive.evt', channels=['EchoChannel'])
 
 		# inject the simple monitor into the correlator
 		correlator.injectEPL(filenames=['simple.mon'])

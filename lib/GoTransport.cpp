@@ -9,7 +9,7 @@
 #include "GoTransport.h"
 #include <vector>
 
-#include "gowrapper.h"
+#include "_cgo_export.h"
 
 using namespace com::softwareag::connectivity;
 
@@ -26,8 +26,8 @@ namespace golang {
 		logger.info("C++ start called");
 		go_transport_start();
 
-		char buf[11] = "HelloWorld";
-		CallIntoTransport(buf, sizeof(buf)-1);
+		// char buf[11] = "HelloWorld";
+		// CallIntoTransport(buf, sizeof(buf)-1);
 	}
 
 	/** Stop the plugin and wait for the request-handling thread */
