@@ -73,7 +73,7 @@ all: $(ALL)
 # -----------------------
 # Simple plugin, C++ API
 # -----------------------
-Release/libGoTransport.so: ./lib/lib.go ./gowrapper.go ./user_go_layer/user.go ./lib/c_go_interface.h ./lib/GoTransport.h ./lib/GoTransport.cpp ./lib/c_go_interface.cpp
+Release/libGoTransport.so: ./gowrapper.go ./user_go_layer/user.go
 	mkdir -p Release
 	CGO_CFLAGS="$(CFLAGS)" CGO_CPPFLAGS="$(CPPFLAGS)" CGO_CXXFLAGS="$(CXXFLAGS)" CGO_LDFLAGS="$(LDFLAGS)" go build -buildmode=c-shared -o $@
 

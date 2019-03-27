@@ -3,7 +3,7 @@ package user
 import (
 	"fmt"
 
-	"../lib"
+	lib "github.com/tejbabu91/apama_connectivity_golang/lib"
 )
 
 // ============================================ User Code ===================================================
@@ -33,9 +33,3 @@ func (t *MyTransport) DeliverMessageTowardsTransport(msg *lib.Message) {
 func MyTransportCreate() lib.Transport {
 	return &MyTransport{lib.BaseTransport{}}
 }
-
-// func init() {
-// 	fmt.Println("User Init called")
-// 	// User need to set the TransportCreateFunc function
-// 	lib.TransportCreateFunc = MyTransportCreate
-// }
