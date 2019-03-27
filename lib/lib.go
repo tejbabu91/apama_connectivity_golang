@@ -52,7 +52,9 @@ type Transport interface {
 	// To get the RawCppTransport from base transport
 	RawCppTransport() unsafe.Pointer
 	// InitBase is called from framework to do initialization work on BaseTransport
-	InitBase(unsafe.Pointer)
+	InitBase(unsafe.Pointer, map[string]interface{})
+	GetConfig() map[string]interface{}
+	// ======== User functions ==============
 	// Start is called when transport is to be started
 	Start()
 	// Shutdown is called to shutdown the transport
@@ -65,7 +67,7 @@ type Transport interface {
 	DeliverMessageTowardsHost(msg *Message)
 }
 
-type TransportCreateFuncType func() Transport
+type TransportCreateFuncType func(config map[string]interface{}) Transport
 
 var TransportCreateFunc TransportCreateFuncType
 
@@ -77,6 +79,7 @@ var TransportObject Transport
 type BaseTransport struct {
 	// Pointer to underlying C++ transport object. Will be set by framework.
 	cppTransport unsafe.Pointer
+	config       map[string]interface{}
 }
 
 // RawCppTransport returns underlying C++ transport object.
@@ -84,9 +87,14 @@ func (t *BaseTransport) RawCppTransport() unsafe.Pointer {
 	return t.cppTransport
 }
 
+func (t *BaseTransport) GetConfig() map[string]interface{} {
+	return t.config
+}
+
 // InitBase must be called by user from create_transport function after creating
-func (t *BaseTransport) InitBase(ptr unsafe.Pointer) {
+func (t *BaseTransport) InitBase(ptr unsafe.Pointer, config map[string]interface{}) {
 	t.cppTransport = ptr
+	t.config = config
 	fmt.Println("BaseTransport initialised")
 }
 
@@ -99,14 +107,21 @@ func (t *BaseTransport) DeliverMessageTowardsHost(msg *Message) {
 }
 
 //export go_transport_create
-func go_transport_create(obj unsafe.Pointer) {
+func go_transport_create(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
 	fmt.Printf("go_transport_create called: %v\n", obj)
+	gobuf := C.GoBytes(buf, bufLen)
+	var config map[string]interface{}
+	err := json.Unmarshal(gobuf, &config)
+	fmt.Printf("go_transport_create config: %s\n", config)
+	if err != nil {
+		fmt.Printf("go_transport_create failed to populate config: %s\n", config)
+	}
 	if TransportObject != nil {
 		fmt.Println("Go Transport seems to be already created")
 	}
 	// call user function to create go transport instance
-	TransportObject = TransportCreateFunc()
-	TransportObject.InitBase(obj)
+	TransportObject = TransportCreateFunc(config)
+	TransportObject.InitBase(obj, config)
 }
 
 //export go_transport_start

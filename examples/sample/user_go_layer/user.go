@@ -30,6 +30,7 @@ func (t *MyTransport) DeliverMessageTowardsTransport(msg *lib.Message) {
 	t.DeliverMessageTowardsHost(msg)
 }
 
-func MyTransportCreate() lib.Transport {
+func MyTransportCreate(config map[string]interface{}) lib.Transport {
+	fmt.Printf("MyTransport created with config: %v\n", config)
 	return &MyTransport{lib.BaseTransport{}}
 }

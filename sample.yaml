@@ -3,7 +3,7 @@ connectivityPlugins:
     libraryName: ClassifierCodec
     class: ClassifierCodec
   goTransport:
-    directory: ${PARENT_DIR}/Release
+    directory: ${PARENT_DIR}/examples/sample/Release
     libraryName: GoTransport
     class: GoTransport
   stringCodec:
@@ -65,5 +65,9 @@ startChains:
 
     # convert everything to json as encoding format  
     - jsonCodec
-    - goTransport
+    - goTransport:
+        config1: Value1
+        config2:
+          - v1
+          - v2
 
