@@ -102,7 +102,7 @@ namespace golang {
 	void GoTransport::start()
 	{
 		logger.info("C++ start called");
-		go_transport_start();
+		go_transport_start(this);
 
 		// char buf[11] = "HelloWorld";
 		// CallIntoTransport(buf, sizeof(buf)-1);
@@ -111,7 +111,7 @@ namespace golang {
 	/** Stop the plugin and wait for the request-handling thread */
 	void GoTransport::shutdown()
 	{
-		go_transport_shutdown();
+		go_transport_shutdown(this);
 	}
 
 	/** Parse the request and queue it for later servicing */
@@ -120,7 +120,7 @@ namespace golang {
 		logger.info("C++ deliverMessageTowardsTransport: %s", to_string(m).c_str());
 		auto payload = get<std::string>(m.getPayload());
 		char * str = const_cast<char*>(payload.c_str());
-		go_transport_deliverMessageTowardsTransport(static_cast<void*>(str), payload.size());
+		go_transport_deliverMessageTowardsTransport(this, static_cast<void*>(str), payload.size());
 	}
 
 	void GoTransport::towardsHost(char* buf, int bufLen) {

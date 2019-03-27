@@ -6,6 +6,7 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"unsafe"
 )
 
@@ -72,7 +73,24 @@ type TransportCreateFuncType func(config map[string]interface{}) Transport
 
 var TransportCreateFunc TransportCreateFuncType
 
-var TransportObject Transport
+type ptrToObjMapper struct {
+	mtx             sync.RWMutex
+	transportObject map[unsafe.Pointer]Transport
+}
+
+var mapper = ptrToObjMapper{sync.RWMutex{}, map[unsafe.Pointer]Transport{}}
+
+func (m *ptrToObjMapper) setMapping(p unsafe.Pointer, t Transport) {
+	m.mtx.Lock()
+	defer m.mtx.Unlock()
+	m.transportObject[p] = t
+}
+
+func (m *ptrToObjMapper) getMapping(p unsafe.Pointer) Transport {
+	m.mtx.RLock()
+	defer m.mtx.RUnlock()
+	return m.transportObject[p]
+}
 
 // The BaseTransport which user need to embed when creating a new transport.
 // User should create empty value when creating its transport instance.
@@ -117,38 +135,43 @@ func go_transport_create(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
 	if err != nil {
 		fmt.Printf("go_transport_create failed to populate config: %s\n", config)
 	}
+	TransportObject := mapper.getMapping(obj)
 	if TransportObject != nil {
 		fmt.Println("Go Transport seems to be already created")
 	}
 	// call user function to create go transport instance
-	TransportObject = TransportCreateFunc(config)
 	TransportObject.InitBase(obj, config)
+	mapper.setMapping(obj, TransportObject)
 }
 
 //export go_transport_start
-func go_transport_start() {
+func go_transport_start(obj unsafe.Pointer) {
 	fmt.Println("go_transport_start called")
+	TransportObject := mapper.getMapping(obj)
 	TransportObject.Start()
 }
 
 //export go_transport_shutdown
-func go_transport_shutdown() {
+func go_transport_shutdown(obj unsafe.Pointer) {
 	fmt.Println("go_transport_shutdown called")
+	TransportObject := mapper.getMapping(obj)
 	TransportObject.Shutdown()
 }
 
 //export go_transport_hostready
-func go_transport_hostready() {
+func go_transport_hostready(obj unsafe.Pointer) {
 	fmt.Println("go_transport_hostready called")
+	TransportObject := mapper.getMapping(obj)
 	TransportObject.HostReady()
 }
 
 //export go_transport_deliverMessageTowardsTransport
-func go_transport_deliverMessageTowardsTransport(buf unsafe.Pointer, bufLen C.int) {
+func go_transport_deliverMessageTowardsTransport(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
 	fmt.Println("go_transport_deliverMessageTowardsTransport called")
 	gobuf := C.GoBytes(buf, bufLen)
 	fmt.Printf("go_transport_deliverMessageTowardsTransport deliver: %v\n", gobuf)
 	msg := deserializeMsg(gobuf)
+	TransportObject := mapper.getMapping(obj)
 	TransportObject.DeliverMessageTowardsTransport(msg)
 }
 
