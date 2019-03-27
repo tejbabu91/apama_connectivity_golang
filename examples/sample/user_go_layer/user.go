@@ -26,7 +26,7 @@ func (*MyTransport) HostReady() {
 }
 
 func (t *MyTransport) DeliverMessageTowardsTransport(msg *lib.Message) {
-	fmt.Printf("MyTransport DeliverMessageTowardsTransport: %s", msg)
+	fmt.Printf("MyTransport DeliverMessageTowardsTransport: %v, %v\n", msg, t.GetConfig())
 	t.DeliverMessageTowardsHost(msg)
 }
 

@@ -48,6 +48,8 @@ monitor GoTransportSample
 			"prime": ["two", "three", "five"]
 		};
 		doRequest(map);
+		send StringRequest(1, "hello to transport 1") to "goRequest";
+		send StringRequest(1, "hello to transport 2") to "goRequest2";
 	}
 	action doRequest(any data)
 	{
@@ -68,6 +70,8 @@ monitor GoTransportSample
 			log "Got response from "+resp.toString() at INFO;
 		}
 		send StringRequest(id, data) to "goRequest";
+		log "Sent: " + StringRequest(id, data).toString();
+		send StringRequest(id, data) to "goRequest2";
 		log "Sent: " + StringRequest(id, data).toString();
 	}
 }

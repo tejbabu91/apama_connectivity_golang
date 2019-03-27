@@ -124,15 +124,10 @@ namespace golang {
 	}
 
 	void GoTransport::towardsHost(char* buf, int bufLen) {
-		// Message m;
-		// hostSide->sendBatchTowardsHost(&m, &m+1);
-		logger.error("##### towards host called, %p, %d", buf, bufLen);
-		char lbuf[100];
-		for(int i=0;i<bufLen;i++) {
-			lbuf[i] = buf[i];
-		}
-		lbuf[bufLen] = '\0';
-		logger.error("Received: %s", lbuf);
+		data_t buffer(buf, bufLen);
+		Message m;
+		m.setPayload(std::move(buffer));
+		hostSide->sendBatchTowardsHost(&m, &m+1);
 	}
 
 	void convertConfigToJson() {
