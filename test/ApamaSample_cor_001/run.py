@@ -5,41 +5,62 @@
 from pysys.constants import *
 from apama.basetest import ApamaBaseTest
 from apama.correlator import CorrelatorHelper
+from pysys.utils import filecopy
+from pysys.utils import fileutils
+
+import shutil, threading
+
+TEST_SUBJECT_DIR = PROJECT.TEST_SUBJECT_DIR + '/examples/sample'
+socketProcessMutex = threading.Lock()
 
 class PySysTest(ApamaBaseTest):
 
 	def execute(self):
+		# copy the build(Release folder) and config yaml to output
+		fileutils.mkdir(self.output+'/Release')
+		with socketProcessMutex:
+			self.copytree(TEST_SUBJECT_DIR+'/Release',self.output+'/Release')
+		filecopy.filecopy(self.input+'/sample.yaml', self.output+'/sample.yaml')
+		
 		# create the correlator helper and start the correlator and an 
 		# engine receive listening on the Echo Channel
 		correlator = CorrelatorHelper(self, name='mycorrelator')
-		correlator.start(logfile='mycorrelator.log', inputLog='mycorrelator.input.log')
-		#correlator.receive(filename='receive.evt', channels=['EchoChannel'])
+		correlator.start(logfile='mycorrelator.log', inputLog='mycorrelator.input.log',config=[self.output+'/sample.yaml'])
+		correlator.injectEPL(['ConnectivityPluginsControl.mon', 'ConnectivityPlugins.mon'], filedir=PROJECT.APAMA_HOME+'/monitors')
+		correlator.receive(filename='receive.evt', channels=['EchoChannel'])
 
 		# inject the simple monitor into the correlator
-		correlator.injectEPL(filenames=['simple.mon'])
+		correlator.injectEPL(filenames=[self.input+'/DemoApp.mon'])
+		#self.wait(3)
 		
-		# create the send process and write events to its stdin
-		correlator.sendEventStrings(
-			'SimpleEvent("This is the first simple event")',
-			'SimpleEvent("This is the second simple event")',
-			channel='TestChannel',
-		)
-		
-		# writes to stdin are asynchronous, wait for receipt in the receive file
+		# wait for receipt msg towards transport
 		# we could use correlator.flush() here instead
-		self.waitForSignal('receive.evt', expr="This is the", condition="==2")
+		self.waitForSignal('mycorrelator.log', expr="\<connectivity.diag.goTransport\> \[transport\] Towards Host:",condition="==4")
 
 		
 	def validate(self):
 		# look for the log statements in the correlator log file
 		exprList = []
-		exprList.append('Received simple event with message - This is the first simple event')
-		exprList.append('Received simple event with message - This is the second simple event')
+		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.StringRequest,requestId:0,sag.channel:goRequest\},data:\{data:Hello to Go from Apama\}\}')
+		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.Request,requestId:1,sag.channel:goRequest\},data:\{data:Hello to Go from Apama\}\}')
+		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.Request,requestId:2,sag.channel:goRequest\},data:\{data:\{odd:\[one,three,five\],prime:\[two,three,five\],even:\[zero,two,four\]\}\}\}')
+		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.StringRequest,requestId:1,sag.channel:goRequest\},data:\{data:hello to transport 1\}\}')
+		self.assertOrderedGrep('mycorrelator.log', exprList=exprList)
+
+		exprList = []
+		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.StringRequest","requestId":0,"sag.channel":"goRequest"\},"data":\{"data":"Hello to Go from Apama"\}\}\>')
+		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.Request","requestId":1,"sag.channel":"goRequest"\},"data":\{"data":"Hello to Go from Apama"\}\}\>')
+		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.Request","requestId":2,"sag.channel":"goRequest"\},"data":\{"data":\{"odd":\["one","three","five"\],"prime":\["two","three","five" ...\>')
+		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.StringRequest","requestId":1,"sag.channel":"goRequest"\},"data":\{"data":"hello to transport 1"\}\}\>')
 		self.assertOrderedGrep('mycorrelator.log', exprList=exprList)
 	
-		# look for the events in the receiver output
-		exprList = []
-		exprList.append('This is the first simple event')
-		exprList.append('This is the second simple event')
-		self.assertOrderedGrep('receive.evt', exprList=exprList)
+		
 	
+	def copytree(self,src, dst, symlinks=False, ignore=None):
+		for item in os.listdir(src):
+		        s = os.path.join(src, item)
+		        d = os.path.join(dst, item)
+		        if os.path.isdir(s):
+		            shutil.copytree(s, d, symlinks, ignore)
+		        else:
+		            shutil.copy2(s, d)
