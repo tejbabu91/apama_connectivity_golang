@@ -136,10 +136,11 @@ func go_transport_create(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
 		fmt.Printf("go_transport_create failed to populate config: %s\n", config)
 	}
 	TransportObject := mapper.getMapping(obj)
-	if TransportObject != nil {
+	if mapper.getMapping(obj) != nil {
 		fmt.Println("Go Transport seems to be already created")
 	}
 	// call user function to create go transport instance
+	TransportObject = TransportCreateFunc(config)
 	TransportObject.InitBase(obj, config)
 	mapper.setMapping(obj, TransportObject)
 }
