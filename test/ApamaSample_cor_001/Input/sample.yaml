@@ -36,7 +36,8 @@ startChains:
           - goRequest
         # ... and send them back to this channel
         defaultChannel: goResponse
-        defaultEventType: "apamax.golang.Response"
+        defaultEventType: "apamax.golang.StringResponse"
+        allowMissing: true
     
     - diag: { tag: application1 }
    
@@ -51,23 +52,11 @@ startChains:
             mapFrom:
               - payload.data: payload
               - payload.id: metadata.requestId
+              - metadata.temp.channel: metadata.sag.channel
+              - metadata.temp.type: metadata.sag.type
 
     - diag: { tag: application2 }   
-    
-    # Framework specific mapping: move both payload and metadata into a single map which can be encoded into json
-    - mapperCodec:
-        "*":
-          towardsTransport:
-            mapFrom:
-              - payload.data: payload
-            # copyFrom:
-            #   - payload.metadata: metadata
-            defaultValue:
-              - metadata.contentType: application/json
-          towardsHost:
-            mapFrom:
-              # - metadata: payload.metadata
-              - payload: payload.data
+
     - goMapperCodec
     - diag: { tag: transport }
 
@@ -103,23 +92,11 @@ startChains:
             mapFrom:
               - payload.data: payload
               - payload.id: metadata.requestId
+              - metadata.temp.channel: metadata.sag.channel
+              - metadata.temp.type: metadata.sag.type
 
     - diag: { tag: application2 }   
     
-    # Framework specific mapping: move both payload and metadata into a single map which can be encoded into json
-    - mapperCodec:
-        "*":
-          towardsTransport:
-            mapFrom:
-              - payload.data: payload
-            # copyFrom:
-            #   - payload.metadata: metadata
-            defaultValue:
-              - metadata.contentType: application/json
-          towardsHost:
-            mapFrom:
-              # - metadata: payload.metadata
-              - payload: payload.data
     - goMapperCodec
     - diag: { tag: transport }
 

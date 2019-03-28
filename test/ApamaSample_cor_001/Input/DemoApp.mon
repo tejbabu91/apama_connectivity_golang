@@ -35,7 +35,7 @@ monitor GoTransportSample
 	action onload()
 	{
 		// get responses that come back from the chain
-		monitor.subscribe("goResonse");
+		monitor.subscribe("goResponse");
 
 		// signal that we are ready to receive events
 		ConnectivityPlugins.onApplicationInitialized();
@@ -54,11 +54,14 @@ monitor GoTransportSample
 	action doRequest(any data)
 	{
 		integer id := integer.getUnique();
-		on Response(id=id) as resp {
+		on all Response(id=id) as resp {
 			log "Got response from "+resp.toString() at INFO;
 		}
+	
 		send Request(id, data) to "goRequest";
 		log "Sent: " + Request(id, data).toString();
+		send Request(id, data) to "goRequest2";
+                log "Sent: " + Request(id, data).toString();
 	}
 
 	action simpleRequest(string data) {

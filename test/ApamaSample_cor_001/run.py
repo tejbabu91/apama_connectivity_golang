@@ -35,24 +35,21 @@ class PySysTest(ApamaBaseTest):
 		
 		# wait for receipt msg towards transport
 		# we could use correlator.flush() here instead
-		self.waitForSignal('mycorrelator.log', expr="\<connectivity.diag.goTransport\> \[transport\] Towards Host:",condition="==4")
+		self.waitForSignal('mycorrelator.log', expr="Towards Host:",condition="==24")
 
 		
 	def validate(self):
 		# look for the log statements in the correlator log file
-		exprList = []
-		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.StringRequest,requestId:0,sag.channel:goRequest\},data:\{data:Hello to Go from Apama\}\}')
-		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.Request,requestId:1,sag.channel:goRequest\},data:\{data:Hello to Go from Apama\}\}')
-		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.Request,requestId:2,sag.channel:goRequest\},data:\{data:\{odd:\[one,three,five\],prime:\[two,three,five\],even:\[zero,two,four\]\}\}\}')
-		exprList.append('\<connectivity.diag.goTransport\> \[transport\] Towards Host: \{\} \/ \{metadata:\{contentType:application/json,sag.type:apamax.golang.StringRequest,requestId:1,sag.channel:goRequest\},data:\{data:hello to transport 1\}\}')
-		self.assertOrderedGrep('mycorrelator.log', exprList=exprList)
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport> (.*) Towards Host:', condition='==12')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport2> (.*) Towards Host:', condition='==12')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport>.*TowardsTransport:', condition='==8')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport2>.*TowardsTransport:', condition='==8')
 
-		exprList = []
-		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.StringRequest","requestId":0,"sag.channel":"goRequest"\},"data":\{"data":"Hello to Go from Apama"\}\}\>')
-		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.Request","requestId":1,"sag.channel":"goRequest"\},"data":\{"data":"Hello to Go from Apama"\}\}\>')
-		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.Request","requestId":2,"sag.channel":"goRequest"\},"data":\{"data":\{"odd":\["one","three","five"\],"prime":\["two","three","five" ...\>')
-		exprList.append('\<connectivity.goTransport.goTransport\> C\+\+ deliverMessageTowardsTransport: Message\<metadata=\{contentType:application/json\}, payload=\{"metadata":\{"contentType":"application/json","sag.type":"apamax.golang.StringRequest","requestId":1,"sag.channel":"goRequest"\},"data":\{"data":"hello to transport 1"\}\}\>')
-		self.assertOrderedGrep('mycorrelator.log', exprList=exprList)
+		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.Response\(0,any\(string,\"Hello to Go from Apama\"\)\)', condition='==1')
+		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.StringResponse\(0,""\)', condition='==1')
+		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.Response\(1,any\(string,"Hello to Go from Apama"\)\)', condition='==1')
+		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.Response\(2,any\(dictionary<any,any>,\{any\(string,"even"\):any\(sequence<any>,\[any\(string,"zero"\),any\(string,"two"\),any\(string,"four"\)\]\),any\(string,"odd"\):any\(sequence<any>,\[any\(string,"one"\),any\(string,"three"\),any\(string,"five"\)\]\),any\(string,"prime"\):any\(sequence<any>,\[any\(string,"two"\),any\(string,"three"\),any\(string,"five"\)\]\)\}\)\)', condition='==1')
+		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.Response\(1,any\(string,"hello to transport 2"\)\)', condition='==1')  
 	
 		
 	
