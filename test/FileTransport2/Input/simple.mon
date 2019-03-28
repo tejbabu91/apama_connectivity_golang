@@ -1,0 +1,51 @@
+/**
+ * $Copyright (c) 2019 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$ 
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG 
+ */
+package apamax;
+
+using com.softwareag.connectivity.ConnectivityPlugins;
+
+event ReadLine {
+	string line;
+}
+
+event ReadLine2 {
+	string line;
+}
+
+event WriteLine {
+	string line;
+}
+
+monitor GoTransportSample
+{
+	action onload()
+	{
+		monitor.subscribe("goReadLine");
+		monitor.subscribe("goReadLine2");
+
+		integer i := 0;
+		while i < 10 {
+		    send WriteLine("Hello from correlator " + i.toString()) to "goWriteLine";
+		    i := i + 1;
+		}
+		integer j := 0;
+		while j < 10 {
+		    send WriteLine("Hello from correlator " + j.toString()) to "goWriteLine2";
+		    j := j + 1;
+		}
+
+        on all ReadLine() as e {
+            log "ReadLine: " + e.line;
+        }
+
+		on all ReadLine2() as e {
+            log "ReadLine2: " + e.line;
+        }
+
+		// signal that we are ready to receive events
+		ConnectivityPlugins.onApplicationInitialized();
+	}
+}
+

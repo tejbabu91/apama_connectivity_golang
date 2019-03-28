@@ -1,0 +1,91 @@
+connectivityPlugins:
+  goTransport:
+    directory: "${EXAMPLES_DIR}/FileTransport/Release"
+    libraryName: GoFileTransport
+    class: GoTransport
+
+  goTransport2:
+    directory: "${EXAMPLES_DIR}/FileTransport/Release"
+    libraryName: GoFileTransport
+    class: GoTransport
+    
+  goMapperCodec:
+    directory: "${EXAMPLES_DIR}/FileTransport/Release"
+    libraryName: GoFileTransport
+    class: GoMapperCodec
+  diag:
+    libraryName: DiagnosticCodec
+    class: DiagnosticCodec
+  jsonCodec:
+    libraryName: connectivity-json-codec
+    class: JSONCodec
+  mapperCodec:
+    libraryName: MapperCodec
+    class: MapperCodec
+
+startChains:
+  goTransport:
+    - apama.eventMap:
+        # Capture events to this channel ...
+        subscribeChannels:
+          - goWriteLine
+        # ... and send them back to this channel
+        defaultChannel: goReadLine
+        defaultEventType: "apamax.ReadLine"
+
+    - diag: { tag: application1 }
+
+    # # application specific mapping
+    - mapperCodec:
+        "*":
+          towardsTransport:
+            mapFrom:
+              - payload: payload.line
+          towardsHost:
+            mapFrom:
+              - payload.line: payload
+
+    - diag: { tag: application2 }
+
+    - goMapperCodec
+
+    - diag: { tag: transport }
+
+    # convert everything to json as encoding format
+    - jsonCodec
+    - goTransport:
+        writeFile: "${PARENT_DIR}/write.txt"
+        readFile: "${PARENT_DIR}/read.txt"
+        
+  goTransport2:
+    - apama.eventMap:
+        # Capture events to this channel ...
+        subscribeChannels:
+          - goWriteLine2
+        # ... and send them back to this channel
+        defaultChannel: goReadLine2
+        defaultEventType: "apamax.ReadLine2"
+
+    - diag: { tag: application1 }
+
+    # # application specific mapping
+    - mapperCodec:
+        "*":
+          towardsTransport:
+            mapFrom:
+              - payload: payload.line
+          towardsHost:
+            mapFrom:
+              - payload.line: payload
+
+    - diag: { tag: application2 }
+
+    - goMapperCodec
+
+    - diag: { tag: transport }
+
+    # convert everything to json as encoding format
+    - jsonCodec
+    - goTransport:
+        writeFile: "${PARENT_DIR}/write2.txt"
+        readFile: "${PARENT_DIR}/read2.txt"
