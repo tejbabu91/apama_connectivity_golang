@@ -1,0 +1,64 @@
+connectivityPlugins:
+  classifierCodec:
+    libraryName: ClassifierCodec
+    class: ClassifierCodec
+  goTransport:
+    directory: ${PARENT_DIR}/Release
+    libraryName: GoTransport
+    class: GoTransport
+  stringCodec:
+    libraryName: connectivity-string-codec
+    class: StringCodec
+  diag:
+    libraryName: DiagnosticCodec
+    class: DiagnosticCodec
+  jsonCodec:
+    libraryName: connectivity-json-codec
+    class: JSONCodec
+  mapperCodec:
+    libraryName: MapperCodec
+    class: MapperCodec
+  goMapperCodec:
+    directory: ${PARENT_DIR}/Release
+    libraryName: GoTransport
+    class: GoMapperCodec
+startChains:
+  goTransport:
+    # Use the Map host plugin, so the payload type will be a map<string,data>
+    # with the keys being the name of the fields in the event
+    - apama.eventMap:
+        # Capture events to this channel ...
+        subscribeChannels:
+          - goRequest
+        # ... and send them back to this channel
+        defaultChannel: goResponse
+        defaultEventType: "apamax.golang.Response"
+    
+    - diag: { tag: application1 }
+   
+    # # application specific mapping
+    - mapperCodec:
+        "*":
+          towardsTransport:
+            mapFrom:
+              - metadata.requestId: payload.id
+              - payload: payload.data
+          towardsHost:
+            mapFrom:
+              - payload.data: payload
+              - payload.id: metadata.requestId
+              - metadata.temp.channel: metadata.sag.channel
+              - metadata.temp.type: metadata.sag.type
+
+    - diag: { tag: application2 }   
+    
+    - goMapperCodec
+    - diag: { tag: transport }
+
+    # convert everything to json as encoding format  
+    - jsonCodec
+    - goTransport:
+        config1: Value1
+        config2:
+          - v1
+          - v2

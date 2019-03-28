@@ -1,0 +1,89 @@
+/**
+ * $Copyright (c) 2019 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$ 
+ * Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG 
+ */
+package apamax.golang;
+
+using com.softwareag.connectivity.ConnectivityPlugins;
+
+
+/** Internal event for sending to the chain */
+event StringRequest
+{
+	integer id;
+	string data;
+}
+
+/** Internal response event from the chain */
+event StringResponse
+{
+	integer id;
+	string body;
+}
+
+event Request {
+	integer id;
+	any data;
+}
+event Response {
+	integer id;
+	any data;
+}
+
+monitor GoTransportSample
+{
+	action onload()
+	{
+		// get responses that come back from the chain
+		monitor.subscribe("goResponse");
+
+		// signal that we are ready to receive events
+		ConnectivityPlugins.onApplicationInitialized();
+		string data := "Hello to Go from Apama";
+		simpleRequest(data);
+		
+		dictionary<string, sequence<integer> > map := {
+			"even": [0,2,4,6,8],
+			"odd": [1,3,5,7,9],
+			"prime": [2,3,5,7]
+		};
+		doRequest(map);
+		
+		send StringRequest(1, "hello to transport 1") to "goRequest";
+
+		//Send complex data
+		sequence<dictionary<string, sequence<dictionary<string, sequence<integer> > > > > complexdata_seq := [
+			{"aa":[{"aa-inner1":[1,2]},{"aa-inner2":[3,4]}]},
+			{"bb":[{"bb-inner":[2,3]}]},
+			{"cc":[{"cc-inner1":[5,4]},{"cc-inner2":[6,4]},{"cc-inner3":[7,4]}]}
+		];
+		doRequest(complexdata_seq);
+
+		dictionary<string, dictionary<string, sequence<dictionary<string, sequence<float> > > > > complexdata_dict :={
+		"qq asdf":{"aaaa":[{"aaaa aaaa":[12.1,13.33,123.111]}]},
+		"www world":{"bbbb":[{"bbbb bbbb":[12.1,13.33,123.111]}]},
+		"asd ijidjf. asdsd jkk.":{"cccc":[{"cccc ccccc":[12.1,13.33,123.111]}]}
+		}; 
+		doRequest(complexdata_dict);
+	}
+	action doRequest(any data)
+	{
+		integer id := integer.getUnique();
+		on all Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
+		}
+		send Request(id, data) to "goRequest";
+		log "Sent: " + Request(id, data).toString();
+	}
+
+	action simpleRequest(string data) {
+		integer id := integer.getUnique();
+
+		on all Response(id=id) as resp {
+			log "Got response from "+resp.toString() at INFO;
+		}
+		send StringRequest(id, data) to "goRequest";
+		log "Sent: " + StringRequest(id, data).toString();
+	}
+	
+}
