@@ -1,15 +1,20 @@
-SAMPLE
+APAMA CONNECTIVITY GOLANG
 
-   Sample connectivity plugin to demonstrate golang integration
+   A Go librray to enable writing Apama Transport plugins in Golang.
 
 DESCRIPTION
 
-  This is an experiment to write connectivity plugins in golang.
+  This project aims to provide a Go library which can be used as a base
+  to write Apama Transport plugins completely in Golang.
+  
+  The library is written with a combination C++ and Go and is visible
+  to Apama as a C++ plugin.
  
 BUILDING THE SAMPLES
-  Install Apama. Source the apama_env file. Run make.
 
-   
-RUNNING THE SAMPLES
-  run plugin using the command:
-    correlator -p 9999 --config tmp.yaml -DHOST=localhost 
+  Install Apama. Run the following commands(currenly only supported on Linux):
+  - $ source ${APAMA_HOME}/bin/apama_env
+  - $ cd examples/sample
+  - $ make
+
+
