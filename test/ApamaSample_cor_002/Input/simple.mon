@@ -39,15 +39,14 @@ monitor GoTransportSample
 		    i := i + 1;
 		}
 
-        on all ReadLine() as e {
-            log "ReadLine: " + e.line;
-        }
+        	on all ReadLine() as e {
+            		log "ReadLine: " + e.line;
+        	}
 
 		// signal that we are ready to receive events
 		ConnectivityPlugins.onApplicationInitialized();
 		string data := "Hello to Go from Apama";
 		simpleRequest(data);
-
 	}
 	action simpleRequest(string data) {
 		integer id := integer.getUnique();

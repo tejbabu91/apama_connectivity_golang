@@ -1,9 +1,9 @@
 connectivityPlugins:
-  goTransport:
+  goFileTransport:
     directory: "${EXAMPLES_DIR}/FileTransport/Release"
     libraryName: GoFileTransport
     class: GoTransport
-  goTransport2:
+  goTransport:
     directory: ${EXAMPLES_DIR}/sample/Release
     libraryName: GoTransport
     class: GoTransport
@@ -26,7 +26,7 @@ connectivityPlugins:
     class: MapperCodec
 
 startChains:
-  goTransport:
+  goFileTransport:
     - apama.eventMap:
         # Capture events to this channel ...
         subscribeChannels:
@@ -35,7 +35,7 @@ startChains:
         defaultChannel: goReadLine
         defaultEventType: "apamax.ReadLine"
 
-    - diag: { tag: application1 }
+    #- diag: { tag: application1 }
 
     # # application specific mapping
     - mapperCodec:
@@ -47,19 +47,19 @@ startChains:
             mapFrom:
               - payload.line: payload
 
-    - diag: { tag: application2 }
+    #- diag: { tag: application2 }
 
     - goMapperCodec
 
-    - diag: { tag: transport }
+    - diag: { tag: filetransport }
 
     # convert everything to json as encoding format
     - jsonCodec
-    - goTransport:
+    - goFileTransport:
         writeFile: "${PARENT_DIR}/write.txt"
         readFile: "${PARENT_DIR}/read.txt"
   
-  goTransport2:
+  goTransport:
     # Use the Map host plugin, so the payload type will be a map<string,data>
     # with the keys being the name of the fields in the event
     - apama.eventMap:
@@ -71,7 +71,7 @@ startChains:
         defaultEventType: "apamax.StringResponse"
         allowMissing: true
     
-    - diag: { tag: application1 }
+    #- diag: { tag: application1 }
    
     # # application specific mapping
     - mapperCodec:
@@ -87,12 +87,12 @@ startChains:
               - metadata.temp.channel: metadata.sag.channel
               - metadata.temp.type: metadata.sag.type
 
-    - diag: { tag: application2 }   
+    #- diag: { tag: application2 }   
   
     - goMapperCodec2
     
-    - diag: { tag: transport }
+    - diag: { tag: echotransport }
 
     # convert everything to json as encoding format  
     - jsonCodec
-    - goTransport2
+    - goTransport

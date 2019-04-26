@@ -44,8 +44,6 @@ func deserializeMsg(v []byte) *Message {
 		Metadata: data["metadata"].(map[string]interface{}),
 	}
 
-	//mdata, ok := data["metadata"].(map[string]interface{}),
-
 	return &msg
 }
 
@@ -114,13 +112,11 @@ func (t *BaseTransport) GetConfig() map[string]interface{} {
 func (t *BaseTransport) InitBase(ptr unsafe.Pointer, config map[string]interface{}) {
 	t.cppTransport = ptr
 	t.config = config
-	fmt.Println("BaseTransport initialised")
 }
 
 // DeliverMessageTowardsHost must be called by user to send message to host
 func (t *BaseTransport) DeliverMessageTowardsHost(msg *Message) {
 	gobuf := serializeMsg(msg)
-	fmt.Printf("DeliverMessageTowardsHost called: %v\n", string(gobuf))
 	C.c_callback(t.RawCppTransport(), unsafe.Pointer(&gobuf[0]), C.int(len(gobuf)))
 }
 
@@ -145,21 +141,18 @@ func go_transport_create(obj unsafe.Pointer, buf unsafe.Pointer, bufLen C.int) {
 
 //export go_transport_start
 func go_transport_start(obj unsafe.Pointer) {
-	fmt.Println("go_transport_start called")
 	TransportObject := mapper.getMapping(obj)
 	TransportObject.Start()
 }
 
 //export go_transport_shutdown
 func go_transport_shutdown(obj unsafe.Pointer) {
-	fmt.Println("go_transport_shutdown called")
 	TransportObject := mapper.getMapping(obj)
 	TransportObject.Shutdown()
 }
 
 //export go_transport_hostready
 func go_transport_hostready(obj unsafe.Pointer) {
-	fmt.Println("go_transport_hostready called")
 	TransportObject := mapper.getMapping(obj)
 	TransportObject.HostReady()
 }
@@ -169,12 +162,6 @@ func go_transport_deliverMessageTowardsTransport(obj unsafe.Pointer, buf unsafe.
 	// fmt.Println("go_transport_deliverMessageTowardsTransport called")
 	gobuf := C.GoBytes(buf, bufLen)
 	msg := deserializeMsg(gobuf)
-	fmt.Printf("go_transport_deliverMessageTowardsTransport called: %v\n", msg)
 	TransportObject := mapper.getMapping(obj)
 	TransportObject.DeliverMessageTowardsTransport(msg)
-}
-
-// export go_transport_init
-func go_transport_init() {
-
 }

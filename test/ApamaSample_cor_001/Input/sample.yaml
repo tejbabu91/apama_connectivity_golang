@@ -39,7 +39,7 @@ startChains:
         defaultEventType: "apamax.golang.StringResponse"
         allowMissing: true
     
-    - diag: { tag: application1 }
+    #- diag: { tag: application1 }
    
     # # application specific mapping
     - mapperCodec:
@@ -55,10 +55,10 @@ startChains:
               - metadata.temp.channel: metadata.sag.channel
               - metadata.temp.type: metadata.sag.type
 
-    - diag: { tag: application2 }   
+    #- diag: { tag: application2 }   
 
     - goMapperCodec
-    - diag: { tag: transport }
+    - diag: { tag: transport1 }
 
     # convert everything to json as encoding format  
     - jsonCodec
@@ -79,7 +79,7 @@ startChains:
         defaultChannel: goResponse
         defaultEventType: "apamax.golang.Response"
     
-    - diag: { tag: application1 }
+    #- diag: { tag: application1 }
    
     # # application specific mapping
     - mapperCodec:
@@ -95,10 +95,10 @@ startChains:
               - metadata.temp.channel: metadata.sag.channel
               - metadata.temp.type: metadata.sag.type
 
-    - diag: { tag: application2 }   
+    #- diag: { tag: application2 }   
     
     - goMapperCodec
-    - diag: { tag: transport }
+    - diag: { tag: transport2 }
 
     # convert everything to json as encoding format  
     - jsonCodec

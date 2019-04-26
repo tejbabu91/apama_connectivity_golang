@@ -35,15 +35,15 @@ class PySysTest(ApamaBaseTest):
 		
 		# wait for receipt msg towards transport
 		# we could use correlator.flush() here instead
-		self.waitForSignal('mycorrelator.log', expr="Towards Host:",condition="==24")
+		self.waitForSignal('mycorrelator.log', expr="Towards Host:",condition="==8")
 
 		
 	def validate(self):
 		# look for the log statements in the correlator log file
-		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport> (.*) Towards Host:', condition='==12')
-		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport2> (.*) Towards Host:', condition='==12')
-		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport>.*TowardsTransport:', condition='==8')
-		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport2>.*TowardsTransport:', condition='==8')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport> (.*) Towards Host:', condition='==4')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.diag\.goTransport2> (.*) Towards Host:', condition='==4')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport>.*Towards Transport:', condition='==4')
+		self.assertLineCount(file='mycorrelator.log', expr='<connectivity\.(.*)\.goTransport2>.*Towards Transport:', condition='==4')
 
 		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.Response\(0,any\(string,\"Hello to Go from Apama\"\)\)', condition='==1')
 		self.assertLineCount(file='mycorrelator.log', expr='apamax.golang.GoTransportSample \[1\] Got response from apamax.golang.StringResponse\(0,""\)', condition='==1')

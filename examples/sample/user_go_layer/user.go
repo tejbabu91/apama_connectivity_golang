@@ -8,29 +8,29 @@ import (
 
 // ============================================ User Code ===================================================
 
-// MyTransport implements custom transport
-type MyTransport struct {
+// EchoTransport implements custom transport
+type EchoTransport struct {
 	lib.BaseTransport
 }
 
-func (*MyTransport) Start() {
-	fmt.Println("MyTransport Start")
+func (*EchoTransport) Start() {
+	fmt.Println("EchoTransport Start")
 }
 
-func (*MyTransport) Shutdown() {
-	fmt.Println("MyTransport Shutdown")
+func (*EchoTransport) Shutdown() {
+	fmt.Println("EchoTransport Shutdown")
 }
 
-func (*MyTransport) HostReady() {
-	fmt.Println("MyTransport hostready")
+func (*EchoTransport) HostReady() {
+	fmt.Println("EchoTransport hostready")
 }
 
-func (t *MyTransport) DeliverMessageTowardsTransport(msg *lib.Message) {
-	fmt.Printf("MyTransport DeliverMessageTowardsTransport: %v, %v\n", msg, t.GetConfig())
+func (t *EchoTransport) DeliverMessageTowardsTransport(msg *lib.Message) {
+	fmt.Printf("EchoTransport DeliverMessageTowardsTransport: %v, %v\n", msg, t.GetConfig())
 	t.DeliverMessageTowardsHost(msg)
 }
 
-func MyTransportCreate(config map[string]interface{}) lib.Transport {
-	fmt.Printf("MyTransport created with config: %v\n", config)
-	return &MyTransport{lib.BaseTransport{}}
+func EchoTransportCreate(config map[string]interface{}) lib.Transport {
+	fmt.Printf("EchoTransport created with config: %v\n", config)
+	return &EchoTransport{lib.BaseTransport{}}
 }
